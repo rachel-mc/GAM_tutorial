@@ -550,6 +550,7 @@ ffun <- function(resp) {
   }
 
 ## This can take several minutes to run
+
 set.seed(2024)
 hfun <- list()
   for(i in 1:10) {
@@ -594,6 +595,7 @@ WALLEYE$AREA <- factor(WALLEYE$AREA)
 
 ## "NULL" NB2 GAMM that does not include YEAR as a predictor
 ## to mimic temporal stability
+
 m_WALLEYE_nb2_NULL <- gam(
   CPUE ~ CONDUCT + D1AUG + DEPTH + EFFORT + TEMP + TURBID +
   s(AREA, bs = "re"), family = nb, method = "ML", data = WALLEYE)
@@ -601,6 +603,7 @@ m_WALLEYE_nb2_NULL <- gam(
 
 ## "linear" NB2 GAMM which fit YEAR as a parametric component
 ## No smooth function is applied
+
 m_WALLEYE_nb2 <- gam(
   CPUE ~ YEAR + CONDUCT + D1AUG + DEPTH + EFFORT + TEMP + TURBID +
   s(AREA, bs = "re"), family = nb, method = "ML", data = WALLEYE)
@@ -608,6 +611,7 @@ m_WALLEYE_nb2 <- gam(
 
 ## All possible values for k (minimum of 3 to 20, as 20 years were
 ## surveyed overall)
+
 m_WALLEYE_nb2_k3<-gam(CPUE~s(YEAR,k=3)+CONDUCT+D1AUG+DEPTH+EFFORT+TEMP+TURBID+
 s(AREA,bs="re"),family=nb,method="ML",data=WALLEYE)
 
@@ -692,6 +696,7 @@ draw(rg_WALLEYE_nb2_k9)
 
 ## Test adequacy with DHARMa using the same model (k = 9) as an example
 ## (Figures S17-18)
+
 simulationOutput<-simulateResiduals(fittedModel = m_WALLEYE_nb2_k9)
 testUniformity(simulationOutput, plot = TRUE)
 testQuantiles(simulationOutput, plot = TRUE)
@@ -716,6 +721,7 @@ ffun<-function(resp) {
   }
 
 ## This can take several minutes to run
+
 set.seed(2024)
 hfun <- list()
   for(i in 1:10) {
@@ -828,6 +834,7 @@ viz_fun <- function(model, predictor) {
   }
 
 ## This can take several seconds to run
+
 summary_vf <- replicate(100, viz_fun(model, predictor))
 mgcViz_score <- mean(summary_vf)
 ll_mgcViz_score <- (quantile(summary_vf, probs = 0.025))[[1]]
@@ -886,7 +893,7 @@ check_resid(m_WALLEYE_nb2_k9_fREML_AR1, select = 3)
 
 ## Compare the two models with and without the AR1 term with itsadug
 
-compareML(m_WALLEYE_nb2_k9_fREML, m_WALLEYE_nb2_k9_fREML_AR1)
+compareML(m_WALLEYE_nb2_k9_fREML, m_WALLEYE_nb2_k9_fREML_AR1, suggest.report = TRUE)
 
 
 ## Test if the retained model that accounts for temporal autocorrelation
@@ -903,7 +910,7 @@ concurvity(m_WALLEYE_nb2_k9_fREML_AR1)
 
 ## Assess the (adjusted) explanatory power of this retained model
 
-model <- m_WALLEYE_nb2_k9
+model <- m_WALLEYE_nb2_k9_fREML_AR1
 
 D2 <- 100 * (1 - model$deviance / model$null.deviance)
 logLik <- logLik(model)
@@ -1202,11 +1209,8 @@ cbind(mgcViz_score, ll_mgcViz_score, ul_mgcViz_score)
 
 ## Predicted values with 95% CI
 
-min(CHARR$FL)
-max(CHARR$FL)
-
 nd_CHARR <- data.frame(
-  FL = seq(182, 674, by = 1),
+  FL = seq(min(CHARR$FL), max(CHARR$FL), by = 1),
   RIVER = "VOLTZ")
 
 model <- m_CHARR_cloglog
